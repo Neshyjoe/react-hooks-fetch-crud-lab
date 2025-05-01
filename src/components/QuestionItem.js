@@ -1,25 +1,55 @@
-import React from "react";
-
-function QuestionItem({ question }) {
+function QuestionItem({ question, onDelete, onUpdate }) {
   const { id, prompt, answers, correctIndex } = question;
 
-  const options = answers.map((answer, index) => (
-    <option key={index} value={index}>
-      {answer}
-    </option>
-  ));
+  function handleDelete() {
+    fetch(`http://localhost:4000/questions/${id}`, {
+      method: "DELETE"
+    }).then(() => onDelete(id));
+  }
+
+  function handleCorrectAnswerChange(e) {
+    const newIndex = parseInt(e.target.value);
+    fetch(`http://localhost:4000/questions/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ correctIndex: newIndex })
+    }).then(() => onUpdate(id, newIndex));
+  }
 
   return (
-    <li>
-      <h4>Question {id}</h4>
-      <h5>Prompt: {prompt}</h5>
-      <label>
-        Correct Answer:
-        <select defaultValue={correctIndex}>{options}</select>
-      </label>
-      <button>Delete Question</button>
-    </li>
+    <div className="question-card">
+      <div className="question-header">
+        <h3>Question #{id}</h3>
+        <button onClick={handleDelete}>Delete Question</button>
+      </div>
+      <p className="prompt">{prompt}</p>
+      
+      <div className="answers">
+        <ul>
+          {answers.map((answer, i) => (
+            <li key={i} className={i === correctIndex ? "correct" : ""}>
+              {answer}
+            </li>
+          ))}
+        </ul>
+      </div>
+      
+      <div className="correct-answer-selector">
+<label htmlFor={`correct-answer-${id}`}>Correct Answer:</label>
+<select
+  id={`correct-answer-${id}`}
+  value={correctIndex}
+  onChange={handleCorrectAnswerChange}
+>
+  {answers.map((_, i) => (
+    <option key={i} value={i}>Answer {i + 1}</option>
+  ))}
+</select>
+      </div>
+    </div>
   );
 }
 
-export default QuestionItem;
+export default Que
